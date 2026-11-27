@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f5132">
+<title>그린 리드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE 차분한 계기판 / IDEA 퍼팅 그린 위 야디지북 한 장 / PICTURE 홀을 위로 둔 경사 화살표 원판
+   COLOUR 짙은 그린 + 흰 패널 + 깃발 노랑 강조 / TYPE Noto Sans KR, 숫자는 크게 / LAYOUT 가로: 설정·경사·목표점 3열, 세로: 목표점→경사→설정 */
+:root{color-scheme:light;--g:#0f5132;--g2:#1d7a4f;--g3:#e6f0e9;--bg:#13221a;--pn:#fff;--ink:#13221a;--mut:#5b6b61;--line:#d6e2d9;--ac:#f2c14e;--acd:#8a6a10;--red:#c0392b}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+header{color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header h1{margin:0;font-size:20px;font-weight:900}
+.pill{font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.15);color:#fff;white-space:nowrap}
+.pill.on{background:var(--ac);color:#3a2c00}
+main{max-width:1100px;margin:0 auto;padding:0 10px 32px;display:grid;gap:10px}
+.dash{display:grid;gap:10px;grid-template-columns:minmax(0,1fr);grid-template-areas:"aim" "slope" "set" "last"}
+@media (min-width:760px){.dash{grid-template-columns:minmax(0,.8fr) minmax(0,1.25fr) minmax(0,1.1fr);grid-template-areas:"set slope aim" "set slope last"}}
+.pn{background:var(--pn);border-radius:16px;padding:14px}
+.pn h3{margin:0;font-size:14px;color:var(--mut);font-weight:700}
+#pSet{grid-area:set}#pSlope{grid-area:slope}#pAim{grid-area:aim}#pLast{grid-area:last}
+.btn{display:block;width:100%;min-height:50px;border:0;border-radius:12px;background:var(--g);color:#fff;font:700 16px "Noto Sans KR",system-ui,sans-serif;cursor:pointer}
+.btn:active{transform:scale(.98)}.btn.sec{background:var(--g3);color:var(--g)}.btn.warn{background:#fbe9e6;color:var(--red)}.btn:disabled{opacity:.45}
+.btn:focus-visible,.seg button:focus-visible,.step button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mut{color:var(--mut);font-size:14px}
+.seg{display:flex;background:var(--g3);border-radius:10px;padding:3px;gap:3px;margin-top:6px}
+.seg button{flex:1;min-height:40px;border:0;border-radius:8px;background:transparent;font:700 14px "Noto Sans KR",system-ui,sans-serif;color:var(--g);cursor:pointer}
+.seg button.on{background:var(--g);color:#fff}
+.val{font-size:40px;font-weight:900;line-height:1.1;text-align:center;font-variant-numeric:tabular-nums}
+.val small{font-size:.5em;font-weight:700}
+.step{display:flex;align-items:center;gap:8px;margin-top:4px}
+.step button{width:48px;height:44px;border:0;border-radius:10px;background:var(--g3);color:var(--g);font:900 22px system-ui;cursor:pointer;flex:none}
+.step output{flex:1;text-align:center;font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+.blk{margin-top:14px}
+input[type=range]{width:100%;accent-color:var(--g);margin-top:8px;height:28px}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;font-weight:700;font-size:15px}
+.sw input{width:24px;height:24px;accent-color:var(--g)}
+.sideTop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dirtag{font-size:22px;font-weight:900;display:flex;align-items:center;gap:6px}
+.box{display:inline-grid;place-items:center;min-width:34px;height:34px;padding:0 6px;border:3px solid var(--ink);border-radius:8px;font-weight:900;font-size:18px}
+.pct{font-size:40px;font-weight:900;font-variant-numeric:tabular-nums}.pct small{font-size:.55em}
+.fig{display:flex;justify-content:center;margin:6px 0}
+.fig svg{width:min(300px,78vw);height:auto}
+.grade{text-align:center;font-weight:900;font-size:20px;margin-bottom:8px}
+.aimBig{font-size:clamp(56px,16vw,84px);font-weight:900;line-height:1;text-align:center;font-variant-numeric:tabular-nums;margin-top:6px}
+.aimBig small{font-size:.4em}
+.aimSide{display:flex;align-items:center;justify-content:center;gap:10px;font-size:26px;font-weight:900;margin-top:6px}
+.paceRow{display:flex;justify-content:center;align-items:baseline;gap:8px;margin-top:14px;font-size:18px;color:var(--mut)}
+.paceRow b{font-size:26px;color:var(--ink);font-variant-numeric:tabular-nums}
+.pbar{position:relative;height:22px;border:2px solid var(--ink);border-radius:4px;margin:6px auto 0;max-width:280px;overflow:hidden}
+.pbar i{position:absolute;inset:0 auto 0 0;background:var(--g2);width:0;transition:width .3s}
+.pbar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.note{font-size:12.5px;color:var(--mut);margin:10px 0 0;text-align:center}
+.cmp{margin-top:12px;background:var(--g3);border-radius:12px;padding:10px 12px;font-size:14px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px}.kv b{text-align:right;font-variant-numeric:tabular-nums}
+.ok{color:var(--g2)}.bad{color:var(--red)}
+.lastRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lastRow .v{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips span{background:var(--g3);border-radius:99px;padding:3px 10px;font-size:13px;font-variant-numeric:tabular-nums}
+.card{background:var(--pn);border-radius:16px;padding:16px}
+.card h2{margin:0 0 10px;font-size:17px}
+.err{background:#fbe9e6;color:var(--red);border-radius:12px;padding:12px;font-size:15px;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:center;margin-bottom:12px}
+@media (max-width:480px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stats div{background:var(--g3);border-radius:12px;padding:10px 4px}
+.stats b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.stats span{font-size:12px;color:var(--mut)}
+details summary{cursor:pointer;font-weight:700}details li,details p{font-size:14.5px}
+/* 시트(측정·예상 입력) */
+.sheetBg{position:fixed;inset:0;background:rgba(10,20,14,.6);display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.sheet{background:#fff;width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+@media (min-width:760px){.sheetBg{align-items:center}.sheet{border-radius:20px}}
+.sheet h2{margin:0 0 6px;font-size:19px}
+.inst{font-size:17px;font-weight:700;margin:4px 0 12px}
+.bar{height:8px;background:var(--g3);border-radius:9px;overflow:hidden;margin:12px 0 4px}.bar i{display:block;height:100%;width:0;background:var(--g2)}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<header><h1>그린 리드</h1><span class="pill" id="pill">센서 꺼짐</span></header>
+<main>
+
+<section class="card" id="startCard">
+  <h2>시작하기</h2>
+  <p class="mut" style="margin-top:0">폰을 그린에 눕혀 경사를 재고, 투어 리드 공식으로 목표점과 페이스를 계산합니다.</p>
+  <button class="btn" id="startBtn">센서 켜기</button>
+  <div class="err hide" id="sensorErr"></div>
+</section>
+
+<div class="dash">
+  <!-- 설정 -->
+  <section class="pn" id="pSet">
+    <h3>그린 스피드</h3>
+    <div class="step"><button id="sMinus" aria-label="스피드 감소">−</button><output id="sVal"></output><button id="sPlus" aria-label="스피드 증가">+</button></div>
+    <div class="seg" id="sUnit"><button data-v="m">미터</button><button data-v="ft">스팀프(ft)</button></div>
+    <div class="blk"><h3>퍼트 거리</h3>
+      <div class="step"><button id="dMinus" aria-label="거리 감소">−</button><output id="dVal"></output><button id="dPlus" aria-label="거리 증가">+</button></div>
+      <input type="range" id="dRange" min="0.5" max="20" step="0.5" aria-label="퍼트 거리">
+      <div class="seg" id="dUnit"><button data-v="m">미터</button><button data-v="p">걸음</button></div>
+    </div>
+    <div class="blk"><h3>폰 놓는 방향</h3>
+      <div class="seg" id="oSeg"><button data-v="P">세로 (윗부분→홀)</button><button data-v="L">가로 (윗부분→왼쪽)</button></div>
+    </div>
+    <label class="sw">연습 모드 (먼저 예상 입력)<input type="checkbox" id="practice"></label>
+  </section>
+
+  <!-- 경사 -->
+  <section class="pn" id="pSlope">
+    <div class="sideTop"><div class="dirtag" id="sideDir"></div><div class="pct" id="sidePct">–</div></div>
+    <div class="fig"><svg viewBox="0 0 240 240" id="slopeFig"></svg></div>
+    <div class="grade" id="gradeTxt">–</div>
+    <div class="row"><button class="btn" id="goFull">정밀 측정 (2회)</button><button class="btn sec" id="goQuick">빠른 측정</button></div>
+  </section>
+
+  <!-- 목표점 -->
+  <section class="pn" id="pAim">
+    <div class="sideTop"><h3>목표점</h3><div class="seg" id="refSeg" style="margin:0;flex:0 0 62%"><button data-v="edge">홀 가장자리</button><button data-v="center">핀 중심</button></div></div>
+    <div class="aimBig" id="aimVal">–</div>
+    <div class="aimSide" id="aimSide"><span class="mut" style="font-size:15px;font-weight:400">경사를 측정하면 표시됩니다</span></div>
+    <p class="mut" style="text-align:center;margin:4px 0 0" id="aimSub"></p>
+    <div class="paceRow">페이스 <b id="paceVal">–</b></div>
+    <div class="pbar"><i id="paceBar"></i></div>
+    <div id="cmpBox"></div>
+  </section>
+
+  <!-- 최근/평균 -->
+  <section class="pn" id="pLast">
+    <div class="lastRow"><div><h3>최근 경사</h3><div class="v" id="lastVal">–</div></div>
+      <div style="display:grid;gap:6px;flex:0 0 46%"><button class="btn sec" id="avgBtn" style="min-height:42px">평균 사용</button><button class="btn sec" id="newPutt" style="min-height:42px">새 퍼트</button></div></div>
+    <div class="chips" id="chips"></div>
+    <div class="row" style="align-items:center;margin-top:10px;gap:12px">
+      <svg viewBox="0 0 120 120" id="bubble" style="width:84px;flex:none"></svg>
+      <div><div style="font-weight:900;font-size:20px" id="liveVal">–</div><p class="mut" style="margin:0" id="liveNote">실시간 수평 (보정 전)</p></div>
+    </div>
+  </section>
+</div>
+
+<section class="card" id="histCard">
+  <h2>연습 기록</h2>
+  <div class="stats" id="stats"></div>
+  <div style="overflow-x:auto"><table><thead><tr><th>시각</th><th>예상</th><th>실측</th><th>오차</th><th>방향</th></tr></thead><tbody id="hist"></tbody></table></div>
+  <p class="mut hide" id="histEmpty">연습 모드를 켜고 측정하면 예상과 실측이 여기에 쌓입니다.</p>
+  <div class="row" style="margin-top:12px"><button class="btn sec" id="copyCsv">CSV 복사</button><button class="btn warn" id="clearHist">기록 삭제</button></div>
+</section>
+
+<section class="card">
+  <details>
+    <summary>측정 원리와 계산식</summary>
+    <ul>
+      <li><b>정밀 측정</b>: 폰을 놓고 한 번, 같은 자리에서 180° 돌려 한 번. 차이의 절반이 경사, 합의 절반이 폰 자체 기울기(카메라 돌출·케이스)이며 이 값이 저장되어 이후 빠른 측정(1회)에 쓰입니다.</li>
+      <li><b>목표점</b>(투어 리드 공식): 핀 중심 기준 (2 × 거리[야드] − 1) × 좌우 경사% × 스팀프/10 인치에 오르막·내리막 보정을 곱합니다. 홀 가장자리 기준은 여기서 홀 반지름(5.4 cm)을 뺀 값입니다. 그린 스피드 보정은 투어 리드 표(스팀프 7·9.5, 182칸)로 확인한 정비례(스팀프/10)이고, 오르막·내리막 보정은 화면 17건에 맞춘 추정식입니다.</li>
+      <li><b>페이스</b>: 거리감은 평지에서 몇 m를 치는 느낌인지(최신 투어 리드 방식, 화면 12건에 맞춘 추정식). 세기 %는 평지 대비 필요한 공 속도의 물리 계산값(구버전 투어 리드 방식과 일치)입니다.</li>
+      <li>투어 리드는 공과 홀 사이 <b>2/3 지점</b>에서 경사를 재는 것을 권장합니다. 경사가 여러 번 바뀌면 두 곳 이상 재고 <b>평균 사용</b>을 누르세요.</li>
+      <li>연습용 도구입니다. 정규 라운드 중 경사 측정 기기 사용은 골프 규칙 4.3 위반입니다.</li>
+    </ul>
+  </details>
+</section>
+</main>
+
+<!-- 예상 입력 시트 -->
+<div class="sheetBg hide" id="guessSheet"><div class="sheet">
+  <h2>먼저 읽어 보세요</h2>
+  <p class="mut" style="margin-top:0">발로 느낀 경사를 입력한 뒤 측정합니다.</p>
+  <h3 class="mut" style="margin:12px 0 0">좌우 경사</h3>
+  <div class="step"><button id="gMinus" aria-label="0.1 감소">−</button><output id="gVal"></output><button id="gPlus" aria-label="0.1 증가">+</button></div>
+  <h3 class="mut" style="margin:12px 0 0">공이 휘는 방향</h3>
+  <div class="seg" id="gBreak"><button data-v="L">우→좌</button><button data-v="0">거의 없음</button><button data-v="R">좌→우</button></div>
+  <h3 class="mut" style="margin:12px 0 0">홀 방향</h3>
+  <div class="seg" id="gUp"><button data-v="U">오르막</button><button data-v="0">평지</button><button data-v="D">내리막</button></div>
+  <div class="row" style="margin-top:16px"><button class="btn sec" id="gCancel">취소</button><button class="btn" id="gGo">측정하기</button></div>
+</div></div>
+
+<!-- 측정 시트 -->
+<div class="sheetBg hide" id="mSheet"><div class="sheet">
+  <h2 id="mTitle">측정 1/2</h2>
+  <div class="fig"><svg viewBox="0 0 200 200" id="placeFig" style="width:180px"></svg></div>
+  <p class="inst" id="mInst"></p>
+  <button class="btn" id="mBtn">측정</button>
+  <div id="mProg" class="hide"><div class="bar"><i id="mBar"></i></div><p class="mut" id="mMsg"></p></div>
+  <button class="btn sec" id="mCancel" style="margin-top:10px">취소</button>
+</div></div>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const buf=[];let gotData=false,measuring=null;
+let delta=store.get('gs_delta',null);
+let hist=store.get('gs_hist',[]);
+let set=Object.assign({spd:2.8,sUnit:'m',dist:3,dUnit:'m',orient:'P',practice:false,ref:'edge'},store.get('gs_set',{}));
+let reads=[],useAvg=false,mode='full',r1=null,pendingGuess=null;
+let guess={v:1.0,brk:'0',up:'0'};
+const P_EXP=0.255,S_EXP=1,Q_UP=0.30,Q_DN=0.20; // 스피드 보정은 투어 리드 표(스팀프 7·9.5, 182칸)로 확인한 정비례. 오르막·내리막 지수는 화면 17건에 맞춘 추정값
+const V_STIMP=1.80; // 스팀프미터 볼 초속(m/s), 투어 리드 화면 2건에 맞춤
+
+/* ---------- 센서 ---------- */
+function onMotion(e){
+  const a=e.accelerationIncludingGravity;if(!a||a.z==null)return;
+  let ax=a.x,ay=a.y,az=a.z;if(isIOS){ax=-ax;ay=-ay;az=-az}
+  if(!gotData){gotData=true;$('pill').textContent='센서 켜짐';$('pill').classList.add('on');$('startCard').classList.add('hide')}
+  const t=performance.now();
+  if(Math.abs(az)<6){buf.push({t,x:NaN,y:NaN,face:az>0?'up':'down'});trim();live(null);return}
+  const s={t,x:-ax/az,y:-ay/Math.abs(az),face:az>0?'up':'down'}; // x: 폰 오른쪽 낮음 +, y: 폰 윗부분 낮음 +
+  buf.push(s);trim();live(s);
+}
+function trim(){const t=performance.now()-10000;while(buf.length&&buf[0].t<t)buf.shift()}
+async function startSensor(){
+  $('sensorErr').classList.add('hide');let perm='n/a';
+  try{if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function')perm=await DeviceMotionEvent.requestPermission()}catch(e){perm='error'}
+  if(typeof DeviceMotionEvent==='undefined'){showErr('이 브라우저는 동작 센서를 지원하지 않습니다. 휴대폰 크롬에서 열어 주세요.');return}
+  window.addEventListener('devicemotion',onMotion);wake();
+  setTimeout(()=>{if(!gotData)showErr('센서 값이 들어오지 않습니다. 크롬 설정 > 사이트 설정 > 동작 센서 허용을 확인하고, https:// 주소에서 열어 주세요. [권한='+perm+', 주소='+location.protocol+']')},2000);
+}
+async function wake(){try{if('wakeLock' in navigator)await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&gotData)wake()});
+function showErr(m){$('sensorErr').textContent=m;$('sensorErr').classList.remove('hide')}
+$('startBtn').addEventListener('click',startSensor);
+
+/* ---------- 실시간 버블 (화면 회전 보정) ---------- */
+function live(s){
+  if(!s){$('liveVal').textContent='폰을 눕혀 주세요';$('bubble').innerHTML=bubbleSvg(0,0);return}
+  let x=s.x,y=s.y;const d=delta&&delta[s.face];if(d){x-=d.x;y-=d.y}
+  $('liveVal').textContent=(Math.hypot(x,y)*100).toFixed(1)+'%';
+  $('liveNote').textContent=d?'실시간 수평 (보정 적용)':'실시간 수평 (보정 전)';
+  $('bubble').innerHTML=bubbleSvg(x,y);
+}
+function bubbleSvg(x,y){
+  let ang=0;try{ang=((screen.orientation&&screen.orientation.angle)||window.orientation||0)*Math.PI/180}catch(e){}
+  const hx=-x,hy=-y,hr=hx*Math.cos(ang)-hy*Math.sin(ang),hu=hx*Math.sin(ang)+hy*Math.cos(ang);
+  const k=900,mx=hr*k,my=-hu*k,r=Math.min(1,40/Math.max(1e-9,Math.hypot(mx,my)));
+  return `<circle cx="60" cy="60" r="54" fill="#e6f0e9" stroke="#1d7a4f" stroke-width="2"/><circle cx="60" cy="60" r="18" fill="none" stroke="#1d7a4f" stroke-dasharray="3 3"/><circle cx="${(60+mx*r).toFixed(1)}" cy="${(60+my*r).toFixed(1)}" r="12" fill="#f2c14e" stroke="#8a6a10" stroke-width="1.5"/>`;
+}
+
+/* ---------- 설정 ---------- */
+function segInit(id,get,on){const el=$(id);const sync=()=>[...el.children].forEach(c=>c.classList.toggle('on',c.dataset.v===get()));sync();
+  el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.dataset.v===get())return;on(b.dataset.v);sync()});return sync}
+const saveSet=()=>store.set('gs_set',set);
+segInit('sUnit',()=>set.sUnit,v=>{set.spd=v==='ft'?Math.round(set.spd/0.3048*2)/2:Math.round(set.spd*0.3048*10)/10;set.sUnit=v;renderSet()});
+segInit('dUnit',()=>set.dUnit,v=>{set.dist=v==='p'?Math.max(1,Math.round(set.dist/0.9144)):Math.round(set.dist*0.9144*2)/2;set.dUnit=v;renderSet()});
+segInit('oSeg',()=>set.orient,v=>{set.orient=v;renderSet()});
+segInit('refSeg',()=>set.ref,v=>{set.ref=v;renderSet()});
+$('sMinus').addEventListener('click',()=>{const ft=set.sUnit==='ft';set.spd=Math.max(ft?5:1.5,Math.round((set.spd-(ft?0.5:0.1))*10)/10);renderSet()});
+$('sPlus').addEventListener('click',()=>{const ft=set.sUnit==='ft';set.spd=Math.min(ft?15:4.5,Math.round((set.spd+(ft?0.5:0.1))*10)/10);renderSet()});
+const dStep=()=>set.dUnit==='p'?1:0.5;
+$('dMinus').addEventListener('click',()=>{set.dist=Math.max(dStep(),set.dist-dStep());renderSet()});
+$('dPlus').addEventListener('click',()=>{set.dist=Math.min(set.dUnit==='p'?25:20,set.dist+dStep());renderSet()});
+$('dRange').addEventListener('input',e=>{set.dist=+e.target.value;renderSet()});
+$('practice').checked=set.practice;$('practice').addEventListener('change',e=>{set.practice=e.target.checked;saveSet()});
+function renderSet(){
+  saveSet();
+  $('sVal').textContent=set.sUnit==='ft'?set.spd.toFixed(1):set.spd.toFixed(1)+' m';
+  $('dVal').textContent=set.dUnit==='p'?set.dist+'걸음':set.dist.toFixed(1)+' m';
+  const rg=$('dRange');rg.min=set.dUnit==='p'?1:0.5;rg.max=set.dUnit==='p'?25:20;rg.step=dStep();rg.value=set.dist;
+  renderAll();
+}
+
+/* ---------- 계산 ---------- */
+function cur(){if(!reads.length)return null;if(useAvg&&reads.length>1){const n=reads.length;return{x:reads.reduce((a,r)=>a+r.x,0)/n,y:reads.reduce((a,r)=>a+r.y,0)/n}}return reads[reads.length-1]}
+function calc(s){
+  const side=s.x*100,line=s.y*100,up=-line; // up: 홀 방향 오르막 +
+  const yd=set.dUnit==='p'?set.dist:set.dist/0.9144, stimp=set.sUnit==='ft'?set.spd:set.spd/0.3048;
+  const mu=V_STIMP**2/(2*9.81*stimp*0.3048), r=(mu+up/100)/mu, stops=r>0.05;
+  const base=Math.max(0,2*yd-1), gf=stops?Math.min(2,Math.pow(1/r,P_EXP)):2;
+  const inch=base*Math.abs(side)*Math.pow(stimp/10,S_EXP)*gf, cm=inch*2.54, edge=cm-5.4; // 홀 지름 10.8cm
+  const pf=stops?Math.pow(r,up>=0?Q_UP:Q_DN):0, lenM=yd*0.9144;
+  return{side,line,up,tot:Math.hypot(side,line),yd,stimp,inch,cm,edge,pace:pf*100,paceM:lenM*pf,force:r*100,stops};
+}
+
+/* ---------- 화면 그리기 ---------- */
+function renderAll(){
+  const s=cur();
+  if(!s){$('slopeFig').innerHTML=slopeSvg(null);return}
+  const c=calc(s);
+  const dirTxt=Math.abs(c.side)<0.1?'좌우 경사 없음':(c.side>0?'<span class="box">좌</span>→ 우':'<span class="box">우</span>→ 좌');
+  $('sideDir').innerHTML=dirTxt;$('sidePct').innerHTML=Math.abs(c.side).toFixed(1)+'<small>%</small>';
+  $('gradeTxt').textContent=Math.abs(c.up)<0.1?'평지 0.0%':(c.up>0?'오르막 ':'내리막 ')+Math.abs(c.up).toFixed(1)+'%';
+  $('slopeFig').innerHTML=slopeSvg(s,c);
+  if(Math.abs(c.side)<0.1||c.cm<1){$('aimVal').innerHTML='0<small> cm</small>';$('aimSide').innerHTML='홀 중심 (곧은 퍼트)';$('aimSub').textContent=''}
+  else{const L=c.side>0,sd=L?'왼쪽':'오른쪽',bx=`<span class="box">${L?'좌':'우'}</span>`;
+    if(set.ref==='edge'){
+      if(c.edge>=0){$('aimVal').innerHTML=c.edge.toFixed(0)+'<small> cm</small>';$('aimSide').innerHTML=`${bx} 홀 ${sd} 바깥`}
+      else{$('aimVal').innerHTML=(-c.edge).toFixed(0)+'<small> cm</small>';$('aimSide').innerHTML=`${bx} 홀 ${sd} 가장자리 안쪽`}
+      $('aimSub').textContent=`${(c.edge/2.54).toFixed(1)}″ (가장자리 기준) · 핀 중심에서 ${c.cm.toFixed(0)} cm · 약 ${(c.cm/10.8).toFixed(1)}컵`}
+    else{$('aimVal').innerHTML=c.cm.toFixed(0)+'<small> cm</small>';$('aimSide').innerHTML=`${bx} 핀 ${sd}`;
+      $('aimSub').textContent=`${c.inch.toFixed(1)}″ (핀 기준) · 홀 가장자리에서 ${Math.max(0,c.edge).toFixed(0)} cm · 약 ${(c.cm/10.8).toFixed(1)}컵`}}
+  $('paceVal').textContent=c.stops?`${c.paceM.toFixed(1)} m 거리감 · 세기 ${c.force.toFixed(0)}%`:'멈추지 않음';
+  $('paceBar').style.width=(c.stops?Math.min(200,c.force)/2:100)+'%';
+  const n=reads.length;$('lastVal').textContent=(Math.hypot(reads[n-1].x,reads[n-1].y)*100).toFixed(1)+'%';
+  $('chips').innerHTML=reads.map((r,i)=>`<span>${i+1}: ${(Math.hypot(r.x,r.y)*100).toFixed(1)}%</span>`).join('');
+  $('avgBtn').textContent=useAvg&&n>1?`평균 사용 중 (${n}곳)`:'평균 사용';$('avgBtn').disabled=n<2;
+}
+function slopeSvg(s,c){
+  let g=`<circle cx="120" cy="120" r="104" fill="#f4f7f3" stroke="#9fb3a6" stroke-width="1.5"/><line x1="120" y1="16" x2="120" y2="224" stroke="#c9d9cd" stroke-dasharray="4 5"/>
+  <circle cx="120" cy="12" r="8" fill="#13221a"/><text x="134" y="17" font-size="13" fill="#13221a" font-family="sans-serif">홀</text>
+  <circle cx="120" cy="226" r="9" fill="#fff" stroke="#13221a" stroke-width="1.5"/>`;
+  if(!s)return g+`<text x="120" y="125" font-size="15" text-anchor="middle" fill="#5b6b61" font-family="sans-serif">측정 전</text>`;
+  const m=Math.hypot(s.x,s.y);
+  if(m*100<0.15)return g+`<text x="120" y="125" font-size="16" text-anchor="middle" fill="#5b6b61" font-family="sans-serif">거의 평지</text>`;
+  const ux=s.x/m,uy=-s.y/m,a=Math.atan2(uy,ux)*180/Math.PI,L=70+Math.min(1,m*100/4)*28; // 내리막 방향(화면 좌표)
+  g+=`<g transform="translate(120 120) rotate(${a.toFixed(1)})">
+    <defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#f2c14e" stop-opacity=".25"/><stop offset="1" stop-color="#f2c14e"/></linearGradient></defs>
+    <path d="M${-L} -16 L${L-34} -16 L${L-34} -32 L${L} 0 L${L-34} 32 L${L-34} 16 L${-L} 16 Z" fill="url(#ag)" stroke="#c98a12" stroke-width="2"/>
+    <text x="${-L+8}" y="5" font-size="14" font-weight="700" fill="#5a3d00" font-family="sans-serif" transform="${Math.abs(a)>90?`rotate(180 ${-L+30} 0)`:''}">${(m*100).toFixed(1)}%</text></g>
+    <text x="120" y="236" font-size="0">.</text>`;
+  return g+`<circle cx="120" cy="120" r="5" fill="#13221a"/>`;
+}
+
+/* ---------- 측정 흐름 ---------- */
+function openSheet(id,on){$(id).classList.toggle('hide',!on)}
+function begin(m){
+  if(!gotData){showErr('먼저 센서를 켜 주세요.');$('startCard').classList.remove('hide');window.scrollTo({top:0,behavior:'smooth'});return}
+  if(m==='quick'&&!(delta&&(delta.up||delta.down))){alert0('저장된 보정값이 없습니다. 정밀 측정을 한 번 하면 빠른 측정을 쓸 수 있습니다.');return}
+  mode=m;pendingGuess=null;
+  if(set.practice){renderGuess();openSheet('guessSheet',true)}else startMeasure();
+}
+function alert0(msg){const el=document.createElement('div');el.className='err';el.textContent=msg;$('pSlope').appendChild(el);setTimeout(()=>el.remove(),5000)}
+$('goFull').addEventListener('click',()=>begin('full'));
+$('goQuick').addEventListener('click',()=>begin('quick'));
+function renderGuess(){$('gVal').textContent=guess.v.toFixed(1)+'%';[...$('gBreak').children].forEach(c=>c.classList.toggle('on',c.dataset.v===guess.brk));[...$('gUp').children].forEach(c=>c.classList.toggle('on',c.dataset.v===guess.up))}
+$('gMinus').addEventListener('click',()=>{guess.v=Math.max(0,Math.round((guess.v-0.1)*10)/10);renderGuess()});
+$('gPlus').addEventListener('click',()=>{guess.v=Math.min(8,Math.round((guess.v+0.1)*10)/10);renderGuess()});
+$('gBreak').addEventListener('click',e=>{const b=e.target.closest('button');if(b){guess.brk=b.dataset.v;renderGuess()}});
+$('gUp').addEventListener('click',e=>{const b=e.target.closest('button');if(b){guess.up=b.dataset.v;renderGuess()}});
+$('gCancel').addEventListener('click',()=>openSheet('guessSheet',false));
+$('gGo').addEventListener('click',()=>{pendingGuess={...guess};openSheet('guessSheet',false);startMeasure()});
+
+function startMeasure(){r1=null;setStep(1);openSheet('mSheet',true)}
+function placeSvg(rot){
+  return `<rect width="200" height="200" rx="16" fill="#e6f0e9"/><circle cx="100" cy="20" r="8" fill="#13221a"/><text x="116" y="25" font-size="13" fill="#13221a" font-family="sans-serif">홀</text>
+  <g transform="rotate(${rot} 100 115)"><rect x="72" y="65" width="56" height="100" rx="10" fill="#fff" stroke="#0f5132" stroke-width="3"/><rect x="80" y="73" width="14" height="22" rx="4" fill="#0f5132"/><path d="M100 82 l-12 16 h24z" fill="#f2c14e" stroke="#8a6a10"/></g>`;
+}
+function setStep(n){
+  $('mProg').classList.add('hide');$('mBtn').disabled=false;$('mBtn').dataset.n=n;
+  const L=set.orient==='L',a0=L?-90:0,first=L?'폰을 가로로, 윗부분(노란 화살표)이 왼쪽을 향하게':'폰 윗부분(노란 화살표)을 홀 쪽으로 향하게';
+  if(mode==='quick'){$('mTitle').textContent='빠른 측정';$('mInst').textContent=first+' 놓고 측정을 누르세요.';$('placeFig').innerHTML=placeSvg(a0)}
+  else if(n===1){$('mTitle').textContent='정밀 측정 1/2';$('mInst').textContent=first+' 놓고 측정을 누르세요.';$('placeFig').innerHTML=placeSvg(a0)}
+  else{$('mTitle').textContent='정밀 측정 2/2';$('mInst').textContent='같은 자리에서 180° 돌려('+(L?'윗부분이 오른쪽':'윗부분이 내 쪽')+') 같은 면으로 놓고 측정을 누르세요.';$('placeFig').innerHTML=placeSvg(a0+180)}
+}
+$('mCancel').addEventListener('click',()=>{measuring&&measuring.cancel();openSheet('mSheet',false)});
+function measure(){
+  return new Promise(resolve=>{
+    const t0=performance.now(),SETTLE=1200,WIN=1500,TMAX=9000,TH=0.004;let done=false;
+    const iv=setInterval(()=>{
+      const now=performance.now(),el=now-t0;
+      $('mBar').style.width=Math.min(100,el/(SETTLE+WIN)*100)+'%';
+      if(el<SETTLE){$('mMsg').textContent='폰에서 손을 떼고 기다리세요';return}
+      const w=buf.filter(s=>s.t>=now-WIN&&s.t>=t0+SETTLE&&!isNaN(s.x));if(w.length<15)return;
+      const n=w.length,mx=w.reduce((a,s)=>a+s.x,0)/n,my=w.reduce((a,s)=>a+s.y,0)/n;
+      const sd=Math.sqrt(w.reduce((a,s)=>a+(s.x-mx)**2+(s.y-my)**2,0)/n),faces=new Set(w.map(s=>s.face));
+      if((sd<TH&&faces.size===1&&el>=SETTLE+WIN)||el>TMAX){clearInterval(iv);done=true;buzz([80,60,80]);resolve({x:mx,y:my,face:w[n-1].face,unstable:sd>=TH})}
+      else $('mMsg').textContent='흔들림이 멈추길 기다리는 중…';
+    },100);
+    measuring={cancel(){if(!done){clearInterval(iv);resolve(null)}}};
+  });
+}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+$('mBtn').addEventListener('click',async()=>{
+  const n=+$('mBtn').dataset.n||1;$('mBtn').disabled=true;$('mProg').classList.remove('hide');buzz(40);
+  const r=await measure();measuring=null;if(!r)return;
+  if(mode==='quick'){const d=delta[r.face];if(!d){$('mMsg').textContent='이 면('+(r.face==='up'?'화면 위':'화면 아래')+')의 보정값이 없습니다. 정밀 측정을 먼저 해 주세요.';$('mBtn').disabled=false;return}
+    done({x:r.x-d.x,y:r.y-d.y})}
+  else if(n===1){r1=r;setStep(2)}
+  else{if(!r1){setStep(1);return}
+    if(r.face!==r1.face){$('mMsg').textContent='첫 번째와 다른 면으로 놓였습니다. 같은 면으로 다시 놓아 주세요.';$('mBtn').disabled=false;return}
+    const d={x:(r1.x+r.x)/2,y:(r1.y+r.y)/2};delta=delta||{};delta[r.face]=d;store.set('gs_delta',delta);
+    done({x:(r1.x-r.x)/2,y:(r1.y-r.y)/2})}
+});
+function done(s){
+  if(set.orient==='L')s={x:-s.y,y:s.x}; // 폰 좌표 → 홀 기준
+  reads.push(s);openSheet('mSheet',false);renderAll();
+  const c=calc(cur());
+  if(pendingGuess){
+    const g=pendingGuess,brk=Math.abs(c.side)<0.3?'0':(c.side>0?'R':'L'),up=Math.abs(c.up)<0.3?'0':(c.up>0?'U':'D'),e=g.v-Math.abs(c.side);
+    const txt={L:'우→좌',R:'좌→우','0':'없음'},ut={U:'오르막',D:'내리막','0':'평지'};
+    $('cmpBox').innerHTML=`<div class="cmp kv"><span>내 예상</span><b>${g.v.toFixed(1)}% ${txt[g.brk]} · ${ut[g.up]}</b><span>좌우 경사 오차</span><b class="${Math.abs(e)<=0.5?'ok':'bad'}">${e>0?'+':''}${e.toFixed(1)}%p</b><span>휘는 방향</span><b class="${g.brk===brk?'ok':'bad'}">${g.brk===brk?'맞음':'틀림'}</b><span>오르막/내리막</span><b class="${g.up===up?'ok':'bad'}">${g.up===up?'맞음':'틀림'}</b></div>`;
+    hist.unshift({t:Date.now(),g,side:c.side,line:c.line,tot:Math.abs(c.side),brk,up});hist=hist.slice(0,500);store.set('gs_hist',hist);renderHist();pendingGuess=null;
+  }else $('cmpBox').innerHTML='';
+  if(innerWidth<760)$('pAim').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('avgBtn').addEventListener('click',()=>{useAvg=!useAvg;renderAll()});
+$('newPutt').addEventListener('click',()=>{reads=[];useAvg=false;$('cmpBox').innerHTML='';['sideDir','sidePct','gradeTxt','aimVal','paceVal','lastVal','aimSub'].forEach(i=>$(i).textContent='–');$('aimSide').innerHTML='<span class="mut" style="font-size:15px;font-weight:400">경사를 측정하면 표시됩니다</span>';$('paceBar').style.width='0';$('chips').innerHTML='';$('avgBtn').textContent='평균 사용';$('avgBtn').disabled=true;renderAll()});
+
+/* ---------- 기록 ---------- */
+function renderHist(){
+  const g=hist.filter(h=>h.g);$('histEmpty').classList.toggle('hide',g.length>0);
+  const n=g.length,mae=n?g.reduce((a,h)=>a+Math.abs(h.g.v-h.tot),0)/n:0,bias=n?g.reduce((a,h)=>a+(h.g.v-h.tot),0)/n:0,dir=n?g.filter(h=>h.g.brk===h.brk).length/n*100:0;
+  $('stats').innerHTML=`<div><b>${n}</b><span>측정 수</span></div><div><b>${n?mae.toFixed(2):'–'}</b><span>평균 오차 %p</span></div><div><b>${n?(bias>0?'+':'')+bias.toFixed(2):'–'}</b><span>${n?(bias>0.1?'과대 경향':bias<-0.1?'과소 경향':'치우침 적음'):'경향'}</span></div><div><b>${n?dir.toFixed(0)+'%':'–'}</b><span>방향 적중</span></div>`;
+  const bt={L:'우→좌',R:'좌→우','0':'–'};
+  $('hist').innerHTML=g.slice(0,30).map(h=>{const d=new Date(h.t),e=h.g.v-h.tot;
+    return `<tr><td>${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</td><td>${h.g.v.toFixed(1)}</td><td>${h.tot.toFixed(1)}</td><td class="${Math.abs(e)<=0.5?'ok':'bad'}">${e>0?'+':''}${e.toFixed(1)}</td><td class="${h.g.brk===h.brk?'ok':'bad'}">${bt[h.g.brk]}/${bt[h.brk]}</td></tr>`}).join('');
+}
+$('copyCsv').addEventListener('click',async()=>{
+  const rows=[['시각','예상좌우%','예상휨','예상오르내림','실측좌우%','실측홀방향%(+내리막)','실측휨','실측오르내림']].concat(hist.filter(h=>h.g).map(h=>[new Date(h.t).toLocaleString('ko-KR'),h.g.v.toFixed(1),h.g.brk,h.g.up,h.side.toFixed(2),h.line.toFixed(2),h.brk,h.up]));
+  try{await navigator.clipboard.writeText(rows.map(r=>r.join(',')).join('\n'));$('copyCsv').textContent='복사됨'}catch(e){$('copyCsv').textContent='복사 실패'}
+  setTimeout(()=>$('copyCsv').textContent='CSV 복사',1500);
+});
+let clearArm=false;
+$('clearHist').addEventListener('click',()=>{if(!clearArm){clearArm=true;$('clearHist').textContent='한 번 더 누르면 삭제';setTimeout(()=>{clearArm=false;$('clearHist').textContent='기록 삭제'},3000);return}
+  hist=[];store.set('gs_hist',hist);renderHist();clearArm=false;$('clearHist').textContent='기록 삭제'});
+
+renderSet();renderHist();$('bubble').innerHTML=bubbleSvg(0,0);$('avgBtn').disabled=true;
+}
+</script>
+</body>
+</html>
